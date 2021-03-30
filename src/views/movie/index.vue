@@ -48,6 +48,7 @@ export default {
     position: relative;
     display: flex;
     flex-direction: column;
+    background-color: #f5f5f5;
 }
 
 #content .movie_menu {
