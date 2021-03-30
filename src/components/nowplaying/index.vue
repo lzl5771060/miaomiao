@@ -1,99 +1,23 @@
 <template>
   <div class="movie_body">
 				<ul>
-					<li>
-						<div class="pic_show"><img src="/images/movie_1.jpg"></div>
+					<li v-for="movie in movieList" :key="movie.id">
+						<div class="pic_show"><img :src="movie.img"></div>
 						<div class="info_list">
-							<h2>无名之辈</h2>
-							<p>观众评 <span class="grade">9.2</span></p>
-							<p>主演: 陈建斌,任素汐,潘斌龙</p>
-							<p>今天55家影院放映607场</p>
+							<div class="title">
+								<h2>{{movie.nm}}</h2>
+								<img v-if="movie.version" src="@/assets/3d.png">
+							</div>
+							<p v-if="movie.sc && aa(movie.showInfo)">观众评 <span class="grade">{{movie.sc}}</span></p>
+							<p v-else-if="!movie.sc && pp(movie.showInfo)"><span class="grade">{{movie.wish}}</span>人想看</p>
+							<p v-else><span>暂无评分</span></p>
+							<p v-show="movie.star">主演: {{movie.star}} </p>
+							<p>{{movie.showInfo}}</p>
 						</div>
-						<div class="btn_mall">
-							购票
+						<div class="btn_pre" v-if="pp(movie.showInfo) && movie.sc == 0">
+							预售
 						</div>
-					</li>
-					<li>
-						<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-						<div class="info_list">
-							<h2>毒液：致命守护者</h2>
-							<p>观众评 <span class="grade">9.3</span></p>
-							<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
-							<p>今天56家影院放映443场</p>
-						</div>
-						<div class="btn_mall">
-							购票
-						</div>
-					</li>
-					<li>
-						<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-						<div class="info_list">
-							<h2>无名之辈</h2>
-							<p>观众评 <span class="grade">9.2</span></p>
-							<p>主演: 陈建斌,任素汐,潘斌龙</p>
-							<p>今天55家影院放映607场</p>
-						</div>
-						<div class="btn_mall">
-							购票
-						</div>
-					</li>
-					<li>
-						<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-						<div class="info_list">
-							<h2>毒液：致命守护者</h2>
-							<p>观众评 <span class="grade">9.3</span></p>
-							<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
-							<p>今天56家影院放映443场</p>
-						</div>
-						<div class="btn_mall">
-							购票
-						</div>
-					</li>
-					<li>
-						<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-						<div class="info_list">
-							<h2>无名之辈</h2>
-							<p>观众评 <span class="grade">9.2</span></p>
-							<p>主演: 陈建斌,任素汐,潘斌龙</p>
-							<p>今天55家影院放映607场</p>
-						</div>
-						<div class="btn_mall">
-							购票
-						</div>
-					</li>
-					<li>
-						<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-						<div class="info_list">
-							<h2>毒液：致命守护者</h2>
-							<p>观众评 <span class="grade">9.3</span></p>
-							<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
-							<p>今天56家影院放映443场</p>
-						</div>
-						<div class="btn_mall">
-							购票
-						</div>
-					</li>
-					<li>
-						<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-						<div class="info_list">
-							<h2>无名之辈</h2>
-							<p>观众评 <span class="grade">9.2</span></p>
-							<p>主演: 陈建斌,任素汐,潘斌龙</p>
-							<p>今天55家影院放映607场</p>
-						</div>
-						<div class="btn_mall">
-							购票
-						</div>
-					</li>
-					<li>
-						<div class="pic_show"><img src="/images/movie_2.jpg"></div>
-						<div class="info_list">
-							<h2>毒液：致命守护者</h2>
-							<p>观众评 <span class="grade">9.3</span></p>
-							<p>主演: 汤姆·哈迪,米歇尔·威廉姆斯,里兹·阿迈德</p>
-							<p>今天56家影院放映443场</p>
-						</div>
-						<div class="btn_mall">
+						<div class="btn_mall" v-else>
 							购票
 						</div>
 					</li>
@@ -102,7 +26,36 @@
 </template>
 <script>
 export default {
-  name:"nowplaying"
+	name:"nowplaying",
+	data() {
+		return {
+			movieList:[]
+		}
+	},
+	mounted() {
+		this.$axios.get("/ajax/movieOnInfoList?token=&optimus_uuid=82E6AED0905811EB94DA2532BA8995111D5D25CB924E45EEBF43948AAA015EAD&optimus_risk_level=71&optimus_code=10").then((result) => {
+			var status = result.status;
+			if (status === 200) {
+				var movies = result.data.movieList;	
+				for (let i = 0; i < movies.length; i++) {	
+					movies[i].img = movies[i].img.replace("w.h","128.180");	
+				}
+				this.movieList = movies;
+			}
+		}).catch((err) => {
+			console.log(err);
+		});
+	},
+	methods: {
+		pp(a){
+			var res = /-/.test(a);
+			return res;
+		},
+		aa(a){
+			var res = /今天/.test(a);
+			return res;
+		}
+	},
 }
 </script>
 <style scoped>
@@ -138,11 +91,16 @@ export default {
     flex: 1;
     position: relative;
 }
+.movie_body .info_list .title{
+    display: flex;
+    position: relative;
+}
 
 .movie_body .info_list h2 {
     font-size: 17px;
     line-height: 24px;
-    width: 150px;
+    /* width: 150px; */
+		margin-right: 15px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -165,10 +123,10 @@ export default {
 }
 
 .movie_body .info_list img {
+		position: relative;
+		top: 5px;
     width: 50px;
-    position: absolute;
-    right: 10px;
-    top: 5px;
+		height: 14px;
 }
 
 .movie_body .btn_mall,
